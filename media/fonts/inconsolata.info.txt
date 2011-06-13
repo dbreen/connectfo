@@ -1,0 +1,4 @@
+Open source developer (fixed width) font from:
+http://www.levien.com/type/myfonts/inconsolata.html
+
+It's pretty nice.

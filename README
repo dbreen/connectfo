@@ -1,0 +1,7 @@
+This game was created for two reasons:
+
+  1) I'd like to dabble in gamedev, just for fun, and as something different than web dev all day;
+  2) To make a better version of Connect Four than my brother did in his high school Java class.
+
+I believe I was successful on both accounts. While creating the game, the part I was focused on most was making a reusable model for simple games, such as a scene manager, and media manager, etc. It works fairly nicely for this simple game.
+
