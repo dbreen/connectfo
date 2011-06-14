@@ -60,17 +60,23 @@ class MainScene(Scene):
                 pygame.draw.circle(screen, utils.lighten(current_color), pos, constants.TILE_SIZE / 2)
 
     def draw_board(self, screen):
-        pygame.draw.rect(screen, constants.BOARD_BG, [constants.BOARD_LEFT, constants.BOARD_TOP, constants.BOARD_WIDTH, constants.BOARD_HEIGHT])
+        board = pygame.Surface((constants.BOARD_WIDTH, constants.BOARD_HEIGHT))
+        board.set_colorkey(constants.TRANSPARENT)
+        board.fill(constants.BOARD_BG)
         for x, col in enumerate(gamestate.board.get_board()):
             for y, tile in enumerate(reversed(col)):
                 if tile is gamestate.EMPTY:
-                    color = constants.WHITE
+                    color = constants.TRANSPARENT
                 elif tile is gamestate.RED:
                     color = constants.RED_TILE
                 else:
                     color = constants.YELLOW_TILE
-                pos = self.board_pos(x, y)
-                self.draw_tile(screen, color, pos)
+                offset = constants.TILE_SPACING + constants.TILE_SIZE
+                per_tile= (constants.TILE_SPACING + constants.TILE_SIZE * 2)
+                pos = (offset + x * per_tile,
+                       offset + y * per_tile)
+                self.draw_tile(board, color, pos)
+        screen.blit(board, (constants.BOARD_LEFT, constants.BOARD_TOP))
 
     def board_pos(self, x, y):
         return (constants.BOARD_LEFT + x * (constants.TILE_SPACING + constants.TILE_SIZE * 2) + constants.TILE_SIZE + constants.TILE_SPACING,

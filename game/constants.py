@@ -17,6 +17,7 @@ WHITE = (255, 255, 255)
 BOARD_BG = (0, 0, 255)
 RED_TILE = (255, 0, 0)
 YELLOW_TILE = (255, 255, 0)
+TRANSPARENT = (255, 0, 255)
 
 # Menu
 MENU_FONT = os.path.join(MEDIA_PATH, "fonts", "inconsolata.otf")
