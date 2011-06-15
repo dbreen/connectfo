@@ -1,5 +1,4 @@
 import pygame
-import sys
 
 
 class SceneError(Exception):
@@ -24,8 +23,8 @@ class SceneManager(object):
                 self._scenes[scene_key] = scene
                 scene.load()
                 scene.setup(first_time=True)
-            except ImportError:
-                raise SceneError("Scene %s could not be loaded" % scene_key)
+            except ImportError, e:
+                raise SceneError("Scene %s could not be loaded: %s" % (scene_key, e))
         else:
             try:
                 scene = self._scenes[scene_key]

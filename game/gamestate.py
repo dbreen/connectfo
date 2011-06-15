@@ -1,9 +1,13 @@
 from game import constants
+from game.ai import AI
 
 
 EMPTY = None
 RED = 1
 YELLOW = 2
+
+HUMAN = 1
+COMPUTER = 2
 
 # Give offsets on how to move around the board when checking for consecutive tiles
 DIRS = (
@@ -69,8 +73,16 @@ class Board(object):
             self.print_board(repr)
 
     @property
+    def board_state(self):
+        return self._tilerep
+
+    @property
     def current_player(self):
         return self._player
+
+    @property
+    def other_player(self):
+        return YELLOW if self._player == RED else YELLOW
 
     def change_player(self):
         self._player = RED if self._player == YELLOW else YELLOW
@@ -110,6 +122,38 @@ class Board(object):
         print
     
 board = Board()
+
+class Players(object):
+    def start(self, red, yellow):
+        self._players = {
+            RED: red, YELLOW: yellow
+        }
+
+    @property
+    def red(self):
+        return self._players[RED]
+
+    @property
+    def yellow(self):
+        return self._players[YELLOW]
+
+    def computer_move(self):
+        ai = self._players[board.current_player]
+        return ai.make_move(board, board.current_player, board.other_player)
+
+    def player_type(self):
+        """Return the type of player whose turn it is now"""
+        player = self._players[board.current_player]
+        if isinstance(player, AI):
+            return COMPUTER
+        else:
+            return HUMAN
+
+players = Players()
+
+def new_game(red, yellow):
+    board.clear()
+    players.start(red, yellow)
 
 if __name__ == "__main__":
     board.print_board()

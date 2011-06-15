@@ -111,25 +111,30 @@ class MainScene(Scene):
         color = RED_TILE if winner == gamestate.RED else YELLOW_TILE
         self.winner_text = self.win_font.render("%s Wins!" % gamestate.board.player_name(winner), True, color)
 
-    def drop_tile(self):
+    def drop_tile(self, current_column):
         self.drop_info = {
-            'col': self.current_column,
+            'col': current_column,
             'row': gamestate.board.next_spot(self.current_column),
             'offset': 0
         }
 
     def play_tile(self):
         gamestate.board.play(self.drop_info['col'])
+        self.drop_info = None
         if gamestate.board.check_win():
             self.do_win()
-        self.drop_info = None
+            return
+        if gamestate.players.player_type() == gamestate.COMPUTER:
+            self.drop_tile(gamestate.players.computer_move())
+        if gamestate.board.check_win():
+            self.do_win()
 
     def do_event(self, event):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 self.manager.switch_scene('menu')
             if gamestate.board.winner and event.key == pygame.K_n:
-                gamestate.board.clear()
+                gamestate.new_game(gamestate.players.red, gamestate.players.yellow)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             if self.about_rect().collidepoint(mouse_pos):
@@ -143,4 +148,4 @@ class MainScene(Scene):
                     # played tried to play on an empty column
                     pass
                 else:
-                    self.drop_tile()
+                    self.drop_tile(self.current_column)

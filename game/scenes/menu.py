@@ -2,6 +2,7 @@ import pygame
 import sys
 
 from game import constants, gamestate
+from game.ai.easy import EasyAI
 from game.media import media
 from game.scene import Scene
 
@@ -50,7 +51,7 @@ class MenuScene(Scene):
 
     def opt_new(self):
         media.fade_music(1000)
-        gamestate.board.clear()
+        gamestate.new_game(gamestate.HUMAN, EasyAI())
         self.manager.switch_scene('main')
         return True
 
