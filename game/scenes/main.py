@@ -19,6 +19,15 @@ class MainScene(Scene):
         self.esc_for_menu = self.font.render("Press ESC for menu, or N for a new game", True, BLACK)
         self.stalemate = self.win_font.render("STALEMATE!!!", True, BLACK)
 
+    def setup(self, first_time):
+        self.new_game()
+
+    def new_game(self):
+        gamestate.new_game(gamestate.players.red, gamestate.players.yellow)
+        # if the first player is a computer, make its move
+        if gamestate.players.player_type() == gamestate.COMPUTER:
+            self.drop_tile(gamestate.players.computer_move())
+
     def render(self, screen):
         screen.blit(media['img.main_bg'], (0, 0))
 
@@ -114,7 +123,7 @@ class MainScene(Scene):
     def drop_tile(self, current_column):
         self.drop_info = {
             'col': current_column,
-            'row': gamestate.board.next_spot(self.current_column),
+            'row': gamestate.board.next_spot(current_column),
             'offset': 0
         }
 
@@ -126,15 +135,13 @@ class MainScene(Scene):
             return
         if gamestate.players.player_type() == gamestate.COMPUTER:
             self.drop_tile(gamestate.players.computer_move())
-        if gamestate.board.check_win():
-            self.do_win()
 
     def do_event(self, event):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 self.manager.switch_scene('menu')
             if gamestate.board.winner and event.key == pygame.K_n:
-                gamestate.new_game(gamestate.players.red, gamestate.players.yellow)
+                self.new_game()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             if self.about_rect().collidepoint(mouse_pos):

@@ -13,7 +13,9 @@ NEW_GAME = 1
 QUIT = 2
 OPTIONS = [
     ('Continue', 'opt_continue', lambda scene: scene.game_running),
-    ('New Game', 'opt_new', None),
+    ('2 Player', 'start_2_player', None),
+    ('Vs CPU', 'start_vs_cpu', None),
+    ('Computer Battle!', 'start_cpu_vs_cpu', None),
     ('Quit', 'opt_quit', None),
 ]
 
@@ -49,11 +51,20 @@ class MenuScene(Scene):
         self.manager.switch_scene('main')
         return True
 
-    def opt_new(self):
+    def new_match(self, player1, player2):
         media.fade_music(1000)
-        gamestate.new_game(gamestate.HUMAN, EasyAI())
+        gamestate.new_game(player1, player2)
         self.manager.switch_scene('main')
         return True
+
+    def start_2_player(self):
+        self.new_match(gamestate.HUMAN, gamestate.HUMAN)
+
+    def start_vs_cpu(self):
+        self.new_match(gamestate.HUMAN, EasyAI())
+
+    def start_cpu_vs_cpu(self):
+        self.new_match(EasyAI(), EasyAI())
 
     def opt_quit(self):
         sys.exit()
