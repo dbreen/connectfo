@@ -1,3 +1,5 @@
+import random
+
 from game import constants
 from game.ai import AI
 
@@ -13,9 +15,9 @@ class EasyAI(AI):
             if val > highest:
                 highest = val
                 play = col
-        # Still haven't found a move... play the first non-full column
+        # Still haven't found a move... play a random non-full column
         if play == -1:
-            for col in range(constants.TILES_ACROSS):
-                if not board.col_full(col):
-                    return col
+            cols = [col for col in range(constants.TILES_ACROSS)
+                    if not board.col_full(col)]
+            return random.choice(cols)
         return play
