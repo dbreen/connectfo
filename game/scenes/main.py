@@ -16,7 +16,7 @@ class MainScene(Scene):
         self.font = pygame.font.Font(MENU_FONT, 20)
         self.win_font = pygame.font.Font(MENU_FONT, 48)
         self.current_player = self.font.render("Current Player:", True, BLACK)
-        self.esc_for_menu = self.font.render("Press ESC for menu", True, BLACK)
+        self.esc_for_menu = self.font.render("Press ESC for menu, or N for a new game", True, BLACK)
         self.stalemate = self.win_font.render("STALEMATE!!!", True, BLACK)
 
     def render(self, screen):
@@ -128,6 +128,8 @@ class MainScene(Scene):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_ESCAPE:
                 self.manager.switch_scene('menu')
+            if gamestate.board.winner and event.key == pygame.K_n:
+                gamestate.board.clear()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             if self.about_rect().collidepoint(mouse_pos):

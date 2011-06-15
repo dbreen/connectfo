@@ -5,6 +5,12 @@ EMPTY = None
 RED = 1
 YELLOW = 2
 
+# Give offsets on how to move around the board when checking for consecutive tiles
+DIRS = (
+    [1, 0], [0, 1], # up, and down
+    [1, 1], [-1, 1] # diagonals
+)
+
 class ColumnFullError(Exception):
     pass
 
@@ -14,18 +20,19 @@ class Board(object):
 
     def clear(self):
         self._player = RED
-        self._winner = None
-        self._board = self.init_board(lambda: EMPTY, constants.TILES_DOWN, constants.TILES_ACROSS)
+        self._winner = EMPTY
+        self._board = self.init_board(EMPTY, constants.TILES_DOWN, constants.TILES_ACROSS)
         # Store counts of consecutive tiles as we're adding them. Pad each side by 1 to prevent
         # needing to bound-check. When a tile is played, add one to the largest consecutive value.
-        # Values are tuples of (up-right diag, down-right diag)
-        self._diags = {
-            RED: self.init_board(lambda: [0, 0], constants.TILES_DOWN + 2, constants.TILES_ACROSS + 2),
-            YELLOW: self.init_board(lambda: [0, 0], constants.TILES_DOWN + 2, constants.TILES_ACROSS + 2),
-        }
+        # Values are tuples with the number of consecutive tiles in each direction (up, down, two diags)
+        self._tilerep = {}
+        for player in (RED, YELLOW):
+            self._tilerep[player] = []
+            for dir in DIRS:
+                self._tilerep[player].append(self.init_board(0, constants.TILES_DOWN + 2, constants.TILES_ACROSS + 2))
 
     def init_board(self, val, rows, cols):
-        return [[val() for row in range(0, rows)] for col in range(0, cols)]
+        return [[val for row in range(0, rows)] for col in range(0, cols)]
 
     def col_full(self, col):
         return not any(slot is EMPTY for slot in self._board[col])
@@ -39,22 +46,27 @@ class Board(object):
                 raise ColumnFullError
         column[row] = self._player
 
-        self.do_diag(col+1, row+1, 0, 1, 1)
-        self.do_diag(col+1, row+1, 1, 1, -1)
+        # add to the consecutive tiles representation for each direction
+        for i, dir in enumerate(DIRS):
+            self.update_repr(col+1, row+1, i, dir[0], dir[1])
 
         self.change_player()
 
-    def do_diag(self, col, row, index, dir1, dir2):
+    def update_repr(self, col, row, dir, dir1, dir2):
         """For this col/row check adjacent values in the specfied dir, updating each val by 1.
         If the val is >= our target consecutive value, flag the winner."""
-        diag = self._diags[self._player]
-        new_val = max(diag[col+dir1][row+dir2][index], diag[col-dir1][row-dir2][index]) + 1
-        diag[col][row][index] = new_val
-        # update adjacents with max val as well
-        diag[col+dir1][row+dir2][index] = new_val
-        diag[col-dir1][row-dir2][index] = new_val
+        repr = self._tilerep[self._player][dir]
+        new_val = repr[col+dir1][row+dir2] + repr[col-dir1][row-dir2] + 1
+        repr[col][row] = new_val
+        # update adjacents with max val as well, if they have a tile
+        if repr[col+dir1][row+dir2] > 0:
+            repr[col+dir1][row+dir2] = new_val
+        if repr[col-dir1][row-dir2] > 0:
+            repr[col-dir1][row-dir2] = new_val
         if new_val >= constants.NECESSARY_CONSEC:
             self._winner = self._player
+            print "Winning board values:"
+            self.print_board(repr)
 
     @property
     def current_player(self):
@@ -75,25 +87,7 @@ class Board(object):
                 return row
         return None
 
-    def check_consec(self, vals):
-        """If we find N consecutive non-empty values, return that repeated value"""
-        last = EMPTY
-        count = 0
-        for val in vals:
-            if val and (val == last or (val is not EMPTY and last is EMPTY)):
-                count += 1
-                if count == constants.NECESSARY_CONSEC:
-                    self._winner = val
-                    return
-            else:
-                count = 0
-            last = val
-
     def check_win(self):
-        for col in self._board:
-            self.check_consec(col)
-        for r in range(0, constants.TILES_DOWN):
-            self.check_consec([row[r] for row in self._board])
         return self._winner is not EMPTY
 
     @property
@@ -106,11 +100,12 @@ class Board(object):
         else:
             return "Yellow"
 
-    def print_board(self):
-        chars = {EMPTY: 'O', RED: 'R', YELLOW: 'Y'}
-        for col in self._board:
+    def print_board(self, board=None):
+        if board is None:
+            board = self._board
+        for col in board:
             for slot in col:
-                print "%s " % chars[slot],
+                print "%d " % slot,
             print
         print
     
