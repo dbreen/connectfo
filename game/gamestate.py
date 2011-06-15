@@ -27,6 +27,9 @@ class Board(object):
     def init_board(self, val, rows, cols):
         return [[val() for row in range(0, rows)] for col in range(0, cols)]
 
+    def col_full(self, col):
+        return not any(slot is EMPTY for slot in self._board[col])
+
     def play(self, col):
         column = self._board[col]
         for row in range(0, constants.TILES_ACROSS):
